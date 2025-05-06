@@ -1,0 +1,2 @@
+curl --http1.1 http://localhost:8002/
+curl --http1.1 -X POST http://localhost:8002/predict -H "Content-Type: application/json" -d '{"Warehouse_block":0,"Mode_of_Shipment":0,"Customer_care_calls":2,"Customer_rating":3,"Cost_of_the_Product":150,"Prior_purchases":3,"Product_importance":0,"Gender":0,"Discount_offered":10,"Weight_in_gms":2000}'
