@@ -1,0 +1,5 @@
+Run python Model.py || { echo "Model development failed"; cat Model.py; exit 1; }
+python: can't open file '/home/runner/work/shipment-live-prec/shipment-live-prec/Model.py': [Errno 2] No such file or directory
+Model development failed
+cat: Model.py: No such file or directory
+Error: Process completed with exit code 1.
