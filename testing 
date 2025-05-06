@@ -32,51 +32,36 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
 
-    - name: Build Docker image
+    - name: Install dependencies
       run: |
-        docker build -t shipment-live-prec .
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-    - name: Run Docker container
+    - name: Run model development
       run: |
-        docker run -d -p 8002:8002 --name shipment-container shipment-live-prec
+        python model.py
+
+    - name: Run FastAPI server in background
+      run: |
+        uvicorn app:app --host 0.0.0.0 --port 8002 &
+        sleep 5  # Wait for server to start
 
     - name: Test FastAPI home endpoint
       run: |
-        sleep 5  # Wait for container to start
         curl --http1.1 http://localhost:8002/ || exit 1
 
     - name: Test FastAPI predict endpoint
       run: |
         curl --http1.1 -X POST http://localhost:8002/predict -H "Content-Type: application/json" -d '{"Warehouse_block":0,"Mode_of_Shipment":0,"Customer_care_calls":2,"Customer_rating":3,"Cost_of_the_Product":150,"Prior_purchases":3,"Product_importance":0,"Gender":0,"Discount_offered":10,"Weight_in_gms":2000}' || exit 1
 
-    - name: Stop Docker container
+    - name: Stop FastAPI server
       run: |
-        docker stop shipment-container
-
-
-
-
-
-
-
-name: CI for Shipment Prediction
-
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+        pkill -f uvicorn
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
@@ -88,13 +73,13 @@ jobs:
     - name: Run Docker container
       run: |
         docker run -d -p 8002:8002 --name shipment-container shipment-live-prec
-
-    - name: Test FastAPI home endpoint
-      run: |
         sleep 5  # Wait for container to start
+
+    - name: Test Dockerized FastAPI home endpoint
+      run: |
         curl --http1.1 http://localhost:8002/ || exit 1
 
-    - name: Test FastAPI predict endpoint
+    - name: Test Dockerized FastAPI predict endpoint
       run: |
         curl --http1.1 -X POST http://localhost:8002/predict -H "Content-Type: application/json" -d '{"Warehouse_block":0,"Mode_of_Shipment":0,"Customer_care_calls":2,"Customer_rating":3,"Cost_of_the_Product":150,"Prior_purchases":3,"Product_importance":0,"Gender":0,"Discount_offered":10,"Weight_in_gms":2000}' || exit 1
 
