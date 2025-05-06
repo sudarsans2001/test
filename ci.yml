@@ -1,0 +1,70 @@
+name: CI for Shipment Prediction
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run model development
+      run: |
+        python Model.py || { echo "Model development failed"; cat Model.py; exit 1; }
+
+    - name: Run FastAPI server in background
+      run: |
+        uvicorn app:app --host 0.0.0.0 --port 8002 &
+        sleep 10
+
+    - name: Test FastAPI home endpoint
+      run: |
+        curl --http1.1 http://localhost:8002/ || { echo "Home endpoint failed"; exit 1; }
+
+    - name: Test FastAPI predict endpoint
+      run: |
+        curl --http1.1 -X POST http://localhost:8002/predict -H "Content-Type: application/json" -d '{"Warehouse_block":"A","Mode_of_Shipment":"Flight","Customer_care_calls":2,"Customer_rating":3,"Cost_of_the_Product":150.0,"Prior_purchases":3,"Product_importance":"low","Gender":"F","Discount_offered":10.0,"Weight_in_gms":2000.0}' || { echo "Predict endpoint failed"; exit 1; }
+
+    - name: Stop FastAPI server
+      run: |
+        pkill -f uvicorn
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Docker image
+      run: |
+        docker build -t shipment-live-prec .
+
+    - name: Run Docker container
+      run: |
+        docker run -d -p 8002:8002 --name shipment-container shipment-live-prec
+        sleep 10
+
+    - name: Test Dockerized FastAPI home endpoint
+      run: |
+        curl --http1.1 http://localhost:8002/ || { echo "Docker home endpoint failed"; exit 1; }
+
+    - name: Test Dockerized FastAPI predict endpoint
+      run: |
+        curl --http1.1 -X POST http://localhost:8002/predict -H "Content-Type: application/json" -d '{"Warehouse_block":"A","Mode_of_Shipment":"Flight","Customer_care_calls":2,"Customer_rating":3,"Cost_of_the_Product":150.0,"Prior_purchases":3,"Product_importance":"low","Gender":"F","Discount_offered":10.0,"Weight_in_gms":2000.0}' || { echo "Predict endpoint failed"; exit 1; }
+
+    - name: Stop Docker container
+      run: |
+        docker stop shipment-container
