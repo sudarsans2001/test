@@ -1,47 +1,22 @@
-
-Code	Details
 422	
-Error: Unprocessable Entity
+Validation Error
 
-Response body
+Media type
+
+application/json
+Example Value
+Schema
+
 
 {
   "detail": [
     {
-      "type": "int_parsing",
       "loc": [
-        "body",
-        "Warehouse_block"
+        "string",
+        0
       ],
-      "msg": "Input should be a valid integer, unable to parse string as an integer",
-      "input": "D"
-    },
-    {
-      "type": "int_parsing",
-      "loc": [
-        "body",
-        "Mode_of_Shipment"
-      ],
-      "msg": "Input should be a valid integer, unable to parse string as an integer",
-      "input": "Flight"
-    },
-    {
-      "type": "int_parsing",
-      "loc": [
-        "body",
-        "Product_importance"
-      ],
-      "msg": "Input should be a valid integer, unable to parse string as an integer",
-      "input": "low"
-    },
-    {
-      "type": "int_parsing",
-      "loc": [
-        "body",
-        "Gender"
-      ],
-      "msg": "Input should be a valid integer, unable to parse string as an integer",
-      "input": "F"
+      "msg": "string",
+      "type": "string"
     }
   ]
 }
