@@ -20,3 +20,16 @@ Schema
     }
   ]
 }
+
+
+ShipmentFeaturesCollapse allobject
+Warehouse_blockstring
+Mode_of_Shipmentstring
+Customer_care_callsinteger
+Customer_ratinginteger
+Cost_of_the_Productnumber
+Prior_purchasesinteger
+Product_importancestring
+Genderstring
+Discount_offerednumber
+Weight_in_gmsnumber
